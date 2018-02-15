@@ -15,3 +15,5 @@ Lab 3 Part2: Character-based calculator using addition(a), subtraction(s), multi
 Lab 4 Part1: Prints a triangle of ^ with size based on the number of rows specified.
 
 Lab 4 Part2: Number converter with two functions: Binary to Decimal & Decimal to Binary.
+
+Lab 5: Prints out Pascal's Triangle based on a specified number of rows.
