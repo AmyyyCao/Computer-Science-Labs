@@ -6,7 +6,6 @@ int main(int argc, char **argv)
 	int amount;
 	int quarters, dimes, nickels, cents;
 	int quartersRemainder, dimesRemainder, nickelsRemainder;
-	char quarters_arr[20], dimes_arr[20], nickels_arr[20], cents_arr[20];
 	
 	quarters = 0;
 	dimes = 0;
@@ -43,43 +42,74 @@ int main(int argc, char **argv)
 		
 		//if there is at least one quarter, a phrase will be printed. if there are no quarters, the quarters phrase will not be printed.
 		while (quarters != 0) {
-			//if there is more than one quarter, the word is changed to be plural. else, it remains singular.
-			(quarters >= 2) ? strcpy(quarters_arr, " quarters,") : strcpy(quarters_arr, " quarter,");
-			if (quartersRemainder == 0) { strcpy(quarters_arr, " quarters"); } //if there is no remainder, no comma is printed.
+			printf(" %d", quarters);
+
+			//if there is no remainder, no comma is printed.
+			if (quartersRemainder == 0) {
+				printf(" quarters");
+			}
 			
-			printf(" %d%s", quarters, quarters_arr);
+			//if there is more than one quarter, the word is changed to be plural. else, it remains singular.
+			else if (quarters > 1) {
+				printf(" quarters,");
+			}
+			
+			else {
+				printf(" quarter,");
+			}
+			
 			quarters = 0;
 		}
 		
 		
-		//if there is at least one dime, a phrase will be printed.
+		//if there is at least one dime, a phrase will be printed. the same printing process is repeated with dimes
 		while (dimes != 0) {
-			//repeat with dimes
-			(dimes >= 2) ? strcpy(dimes_arr, " dimes,") : strcpy(dimes_arr, " dime,");
-			if (dimesRemainder == 0) { strcpy(dimes_arr, " dime"); }
+
+			printf(" %d", dimes);
 			
-			printf(" %d%s", dimes, dimes_arr);
+			if (dimesRemainder == 0) {
+				printf(" dime");
+			}
+			
+			else if (dimes > 1) {
+				printf(" dimes,");
+			}
+			
+			else {
+				printf(" dime,");
+			}
+			
 			dimes = 0;
 		}
 		
 		
 		//if there is at least one nickel, a phrase will be printed.
 		while (nickels != 0) {
-			//repeat with nickels
-			(nickels >= 2) ? strcpy(nickels_arr, " nickels,") : strcpy(nickels_arr, " nickel,");
-			if (nickelsRemainder == 0) { strcpy(nickels_arr, " nickel"); }
 			
-			printf(" %d%s", nickels, nickels_arr);
+			printf(" %d", nickels);
+			
+			if (nickelsRemainder == 0) {
+				printf(" nickel");
+			}
+			
+			else if (nickels > 1) {
+				printf(" nickels,");
+			}
+			
+			else {
+				printf(" nickel,");
+			}
+			
 			nickels = 0;
 		}
 		
 		
 		//if there is at least one cent, a phrase will be printed.
 		while (cents != 0) {
-			//repeat with cents
-			(cents >= 2) ? strcpy(cents_arr, " cents") : strcpy(cents_arr, " cent");
-		
-			printf(" %d%s", cents, cents_arr);
+			
+			printf(" %d", cents);
+			(cents >= 2) ? printf(" cents") : printf(" cent");
+	
 			cents = 0;
 		}
 		
