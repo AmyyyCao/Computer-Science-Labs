@@ -19,3 +19,5 @@ Lab 4 Part2: Number converter with two functions: Binary to Decimal & Decimal to
 Lab 5: Prints out Pascal's Triangle based on a specified number of rows.
 
 Lab 6: Working Reversi game with a customized board size and initial setup; lists the valid moves for both colours.
+
+Lab 7 Part1: Full working Reversi game with computer player.
