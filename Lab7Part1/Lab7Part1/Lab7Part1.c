@@ -15,11 +15,12 @@ bool positionInBounds(int n, int row, int col);
 bool changeColour(char board[][26], int n, int i, int j, int colour);
 bool changeTileColour(char board[][26], int n, int row, int col, char turnColour, int deltaRow, int deltaCol);
 
-int main(int argc, const char * argv[]);
+int main();
 
-bool playerMove(char board[][26], int playerColour, int n);
+bool playerMove(char board[][26], char playerColour, int n);
+bool computerMove(char board[][26], char computerColour, int n);
 void bestMove(char board[][26], char computerColour, int n, int *i, int *j);
-int countScore(char pseudoBoard[][26], char color, int n);
+int countScore(char board[][26], char color, int n, int row, int col);
 int bestScore(int newScore, int newRow, int newCol, int n);
 
 bool availableMoves(char board[][26], int n, int i, int j, int colour);
@@ -32,8 +33,8 @@ bool checkLegalInDirection(char board[][26], int n, int row, int col, char turnC
 
 void initializeBoard(char board[][26], int n) {
     
-    for (int i = 0; i <= 26; i++) {
-        for (int j = 0; j <= 26; j++) {
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
             board[i][j] = 'U';
         }
     }
@@ -70,6 +71,7 @@ void printBoard(char board[][26], int n) {
         }
     }
     printf("\n");
+    
 }
 
 
@@ -88,11 +90,12 @@ bool positionInBounds(int n, int row, int col) {
 
 
 
+
+
 /*------------------------------ 2.0 MOVES ------------------------------*/
 
 /*------------------------------ 2.1 Player Move ------------------------------*/
-//done I think
-bool playerMove(char board[][26], int playerColour, int n) {
+bool playerMove(char board[][26], char playerColour, int n) {
     int row = 0, col = 0;
     char r, c;
     bool legal = false;
@@ -104,18 +107,14 @@ bool playerMove(char board[][26], int playerColour, int n) {
                 legal = true;
             }
         }
-    };
-    
-    if (!legal) {
-        printf("%c player has no valid move.", playerColour);
     }
     
-    else {
+    if (legal) {
         printf("Enter move for colour %c (RowCol): ", playerColour);
-        scanf("%c%c", &r, &c);
+        scanf(" %c%c", &r, &c);
         
-        row = (int)r - 97;
-        col = (int)c - 97;
+        row = r - 'a';
+        col = c - 'a';
         
         board[row][col] = playerColour; //tile is placed
         
@@ -123,6 +122,8 @@ bool playerMove(char board[][26], int playerColour, int n) {
             board[row][col] = 'U';
             legal = false;
         }
+        
+        printBoard(board, n);
     }
     
     return legal;
@@ -131,17 +132,16 @@ bool playerMove(char board[][26], int playerColour, int n) {
 
 /*------------------------------ 2.2 Computer Move ------------------------------*/
 
-void computerMove(char board[][26], int computerColour, int n) {
-    int row = 0, col = 0;
-    
-    char pseudoBoard[26][26] = {};
-    int newScore = 0, maxScore = 0, bestRow = 0, bestCol = 0;
+bool computerMove(char board[][26], char computerColour, int n) {
+    int newScore = 0, maxScore = 0, bestRow = -1, bestCol = -1;
+    bool legal = true;
     
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
             if (availableMoves(board, n, i, j, computerColour)) {
                 
-                newScore = countScore(pseudoBoard, computerColour, n);
+                legal = true;
+                newScore = countScore(board, computerColour, n, i, j);
                 
                 if (newScore > maxScore) {
                     maxScore = newScore;
@@ -152,61 +152,48 @@ void computerMove(char board[][26], int computerColour, int n) {
         }
     }
     
-    printf("Computer places %c at %c%c.", computerColour, row, col);
+    if (bestRow == -1 && bestCol == -1) {
+        legal = false;
+    }
     
-    board[row][col] = computerColour;
-    changeColour(board, n, row, col, computerColour);
+    else {
+        printf("Computer places %c at %c%c.\n", computerColour, bestRow + 'a', bestCol + 'a');
+        printBoard(board, n);
+    }
     
+    board[bestRow][bestCol] = computerColour;
+    changeColour(board, n, bestRow, bestCol, computerColour);
+    
+    return legal;
 }
-
 
 
 /*------------------------------ 2.4 Computer Move Total Score ------------------------------*/
 //tallies up the score for each possible move
 //considers the weights of each tile
-int countScore(char pseudoBoard[][26], char color, int n) {
+int countScore(char board[][26], char color, int n, int row, int col) {
     int score = 0;
+    
+    char pseudoBoard[26][26];
+    
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            pseudoBoard[i][j] = board[i][j];
+        }
+    }
+    
+    changeColour(pseudoBoard, n, color, row, col);
     
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
             if (pseudoBoard[i][j] == color) {
-                
-                //if the player's color captures a corner
-                //REALLY GOOD. 5+ REWARD
-                if ((i == 0 && j == 0) || (i == (n-1) && j == 0) || (i == 0 && j == (n-1)) || (i == (n-1) && j == (n-1))) {
-                    score += 5;
-                }
-                
-                //if the player's color lands on a tile touching the corners
-                //UGH TERRIBLE. -5 PENALTY
-                else if ((i <= 1 && j <= 1) || (i >= (n-2) && j <= 1) || (i <= 1 && j >= (n-2)) || (i >= (n-2) && j >= (n-2))) {
-                    score -= -5;
-                }
-                
-                //if the player's color captures an edge
-                //GOOD. 3+ REWARD
-                else if (i == 0 || j == 0 || i == (n-1) || j == (n-1)) {
-                    score += 3;
-                }
-                
-                //if the player's color is two tiles away from a corner
-                //SURE. +2 REWARD
-                else if ((i <= 2 && j <= 2) || (i >= (n-3) && j <= 2) || (i <= 2 && j >= (n-3)) || (i >= (n-3) && j >= (n-3))) {
-                    score += 2;
-                }
-                
-                //all other cases
-                else {
-                    score++;
-                }
+                score++;
             }
         }
     }
     
     return score;
 }
-
-
 
 
 
@@ -251,7 +238,6 @@ bool availableMoves(char board[][26], int n, int i, int j, int colour) {
 
 bool checkLegalInDirection(char board[][26], int n, int row, int col, char turnColour, int deltaRow, int deltaCol) {
     
-    int initialRow = row, initialCol = col;
     char oppositeColour;
     bool legal;
     
@@ -266,14 +252,14 @@ bool checkLegalInDirection(char board[][26], int n, int row, int col, char turnC
     
     
     //checks if the space you’re on is unoccupied
-    //if not true, should go to the next value of the loop **(implement this)
+    //if not true, should go to the next value of the loop
     if (board[row][col] == 'U') {
         
         row += deltaRow;
         col += deltaCol;
         
         if ((board[row][col] == turnColour)||(board[row][col] == 'U')||!positionInBounds(n, row, col)) {
-            legal = 0;
+            legal = false;
         }
         
         //potential for the move to be valid. So, check if there is a turnColour tile in that direction.
@@ -284,38 +270,26 @@ bool checkLegalInDirection(char board[][26], int n, int row, int col, char turnC
                 col += deltaCol;
                 
                 if (board[row][col] == turnColour) {
-                    legal = 1;
+                    legal = true;
                 }
                 
                 else {   //if the detector encounters 'U'
                     //assigns legal to 0 here, BUT if the tile is oppositeColour, the loop will run again with the potential to be REASSIGNED to legal = 1 if it is the turnColour.
-                    legal = 0;
+                    legal = false;
                 }
             }
             while (board[row][col] == oppositeColour);
-            
-            if (legal) { //may need to move this to a separate function if the boolean needs to be used.
-                printf("%c%c\n", 'a'+initialRow, 'a'+initialCol);
-            }
             
         }
     }
     
     else {
-        legal = 0;
+        legal = false;
     }
     
     return legal;
     
 }
-
-
-
-
-
-
-
-
 
 
 
@@ -338,28 +312,24 @@ bool checkLegalInDirection(char board[][26], int n, int row, int col, char turnC
 /* Calls the changeTileColour function 8 times */
 
 bool changeColour(char board[][26], int n, int i, int j, int colour) {
-    bool legal;
+    bool legal = false;
     
     if (changeTileColour(board, n, i, j, colour, 1, -1))
-        legal = 1;
-    else if (changeTileColour(board, n, i, j, colour, 1, 0))
-        legal = 1;
-    else if (changeTileColour(board, n, i, j, colour, 1, 1))
-        legal = 1;
-    else if (changeTileColour(board, n, i, j, colour, 0, -1))
-        legal = 1;
-    else if (changeTileColour(board, n, i, j, colour, 0, 1))
-        legal = 1;
-    else if (changeTileColour(board, n, i, j, colour, -1, -1))
-        legal = 1;
-    else if (changeTileColour(board, n, i, j, colour, -1, 0))
-        legal = 1;
-    else if (changeTileColour(board, n, i, j, colour, -1, 1))
-        legal = 1;
-    
-    else {
-        legal = 0;
-    }
+        legal = true;
+    if (changeTileColour(board, n, i, j, colour, 1, 0))
+        legal = true;
+    if (changeTileColour(board, n, i, j, colour, 1, 1))
+        legal = true;
+    if (changeTileColour(board, n, i, j, colour, 0, -1))
+        legal = true;
+    if (changeTileColour(board, n, i, j, colour, 0, 1))
+        legal = true;
+    if (changeTileColour(board, n, i, j, colour, -1, -1))
+        legal = true;
+    if (changeTileColour(board, n, i, j, colour, -1, 0))
+        legal = true;
+    if (changeTileColour(board, n, i, j, colour, -1, 1))
+        legal = true;
     
     return legal;
 }
@@ -463,11 +433,11 @@ char winner(char board[][26], int n, char playerColour, char computerColour) {
 
 /*------------------------------ 4.0 MAIN FUNCTION ------------------------------*/
 
-int main(int argc, const char * argv[]) {
-    char computerColour, playerColour, winningColour;
-    char board[][26] = {};
+int main() {
+    char computerColour = 'X', playerColour, winningColour;
+    char board[26][26];
     int boardSize;
-    bool playerTurn;
+    bool playerTurn, playerLegal = true, compLegal = true;
     
     printf("Enter the board dimension: ");
     scanf("%d", &boardSize);
@@ -489,25 +459,34 @@ int main(int argc, const char * argv[]) {
         playerColour = 'W';
     }
     
+    
     //continue to play moves while the moves are legal
-    do {
+    while (playerLegal || compLegal) {
         
         if (playerTurn == true) {
-            if(!playerMove(board, playerColour, boardSize)) {
-                printf("Invalid move.\n");
-                break;
-            }
+            playerLegal = playerMove(board, playerColour, boardSize);
             playerTurn = false; //next time, it will be the computer's turn
         }
         
         else {
-            computerMove(board, computerColour, boardSize);
+            compLegal = computerMove(board, computerColour, boardSize);
             playerTurn = true; //next time, it will be the player's turn
         }
         
-        printBoard(board, boardSize);
+        
+        if (!playerLegal && !compLegal) {
+            break;
+        }
+        
+        else if (!playerLegal) {
+            printf("%c player has no valid move.\n", playerColour);
+        }
+        
+        else if (!compLegal) {
+            printf("%c player has no valid move.\n", computerColour);
+        }
     }
-    while (playerMove(board, playerColour, boardSize));
+    
     
     winningColour = winner(board, boardSize, playerColour, computerColour); //function to count number of B & W pieces on the board.
     
