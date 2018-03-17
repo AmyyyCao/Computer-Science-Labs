@@ -7,9 +7,9 @@
 
 /*------------------------------ 0.0 PROTOTYPES------------------------------*/
 
-void initializeBoard(int n);
+void initializeBoard(char board[][26], int n);
 void printBoard(char board[][26], int n);
-void boardConfig(int n);
+void boardConfig(char board[][26], int n);
 
 bool positionInBounds(int n, int row, int col);
 
@@ -27,12 +27,9 @@ int main(int argc, const char * argv[]);
 
 /*------------------------------ 1.0 FUNCTIONS ------------------------------*/
 
-char board[][26] = {};
-
-
 /*------------------------------ 1.1 Initialize Board ------------------------------*/
 
-void initializeBoard(int n) {
+void initializeBoard(char board[][26], int n) {
     
     for (int i = 0; i <= 26; i++) {
         for (int j = 0; j <= 26; j++) {
@@ -78,7 +75,7 @@ void printBoard(char board[][26], int n) {
 /*------------------------------ 1.3 Board Configuration ------------------------------*/
 /* prepares initial board configuration based on user input */
 
-void boardConfig(int n) {
+void boardConfig(char board[][26], int n) {
     char colour=0, row, col;
     
     scanf(" %c%c%c", &colour, &row, &col);
@@ -137,7 +134,7 @@ bool checkLegalInDirection(char board[][26], int n, int row, int col, char turnC
 
     int initialRow = row, initialCol = col;
     char oppositeColour;
-    bool legal, a;
+    bool legal;
 
     //assigns the oppositeColour
     if (turnColour == 'W') {
@@ -325,15 +322,16 @@ bool changeTileColour(char board[][26], int n, int row, int col, char turnColour
 
 int main(int argc, const char * argv[]) {
     int boardSize;
+    char board[26][26];
     
     printf("Enter the board dimension: ");
     scanf("%d", &boardSize);
     
-    initializeBoard(boardSize);
+    initializeBoard(board, boardSize);
     printBoard(board, boardSize);
     
     printf("Enter board configuration:\n");
-    boardConfig(boardSize);
+    boardConfig(board, boardSize);
     
     printf("Available moves for W:\n");
     availableMoves(board, boardSize, 'W');
