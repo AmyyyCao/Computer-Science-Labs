@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 #include <stdbool.h>
-
+#include "lab7part2lib.h"
 
 
 /*------------------------------ 0.0 PROTOTYPES------------------------------*/
@@ -21,6 +21,7 @@ bool playerMove(char board[][26], char playerColour, int n, bool *allowed);
 bool computerMove(char board[][26], char computerColour, int n);
 void bestMove(char board[][26], char computerColour, int n, int *i, int *j);
 int countScore(char board[][26], char color, int n, int row, int col);
+int countScoreSecond(char board[][26], char color, int n, int row, int col);
 int bestScore(int newScore, int newRow, int newCol, int n);
 
 bool availableMoves(char board[][26], int n, int i, int j, int colour);
@@ -28,6 +29,7 @@ bool checkLegalInDirection(char board[][26], int n, int row, int col, char turnC
 
 /*------------------------------ 1.0 SETUP ------------------------------*/
 
+char U = (char)46;
 
 /*------------------------------ 1.1 Initialize Board ------------------------------*/
 
@@ -35,7 +37,7 @@ void initializeBoard(char board[][26], int n) {
     
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            board[i][j] = 'U';
+            board[i][j] = U;
         }
     }
     
@@ -120,7 +122,7 @@ bool playerMove(char board[][26], char playerColour, int n, bool *allowed) {
         
         
         if (!changeColour(board, n, row, col, playerColour)) {
-            board[row][col] = 'U';
+            board[row][col] = U;
             legal = false;
             *allowed = false;
             return legal;
@@ -156,6 +158,9 @@ bool computerMove(char board[][26], char computerColour, int n) {
         }
     }
     
+    
+    
+    
     if (bestRow == -1 && bestCol == -1) {
         legal = false;
     }
@@ -175,8 +180,96 @@ bool computerMove(char board[][26], char computerColour, int n) {
 //tallies up the score for each possible move
 //considers the weights of each tile
 int countScore(char board[][26], char color, int n, int row, int col) {
-    int score = 0;
+    int score = 0, newScore = 0, maxScore = 0, bestRow = -1, bestCol = -1;
+    char playerColour;
+    bool legal;
     
+    char pseudoBoard[26][26];
+    
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            pseudoBoard[i][j] = board[i][j];
+        }
+    }
+    
+    //change tile colour to computer colour
+    changeColour(pseudoBoard, n, color, row, col);
+    
+    
+    //assign player colour based on computer colour
+    (color == 'B') ? (playerColour = 'W') : (playerColour = 'B');
+    
+    //play the BEST player move
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (availableMoves(pseudoBoard, n, i, j, playerColour)) {
+                
+                legal = true;
+                newScore = countScoreSecond(pseudoBoard, playerColour, n, i, j);
+                
+                if (newScore > maxScore) {
+                    maxScore = newScore;
+                    bestRow = i;
+                    bestCol = j;
+                }
+            }
+        }
+    }
+    
+    changeColour(pseudoBoard, n, playerColour, bestRow, bestCol);
+    
+    
+    //if there is no player move, that's great for the computer; score is very high;
+    if (bestRow == -1 && bestCol == -1) {
+        score += 10000;
+    }
+    
+    //tallying up the computer score
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (pseudoBoard[i][j] == color) {
+                //if the player's color captures a corner
+                //REALLY GOOD. +100 REWARD
+                if ((i == 0 && j == 0) || (i == (n-1) && j == 0) || (i == 0 && j == (n-1)) || (i == (n-1) && j == (n-1))) {
+                    score += 100;
+                }
+                
+                //if the player's color lands on a tile touching the corners
+                //UGH TERRIBLE. -20 PENALTY
+                else if ((i <= 1 && j <= 1) || (i >= (n-2) && j <= 1) || (i <= 1 && j >= (n-2)) || (i >= (n-2) && j >= (n-2))) {
+                    score -= -1000;
+                }
+                
+                //if the player's color captures an edge
+                //GOOD. +20 REWARD
+                else if (i == 0 || j == 0 || i == (n-1) || j == (n-1)) {
+                    score += 20;
+                }
+                
+                //if the player's color is two tiles away from a corner
+                //SURE. +2 REWARD
+                else if ((i <= 2 && j <= 2) || (i >= (n-3) && j <= 2) || (i <= 2 && j >= (n-3)) || (i >= (n-3) && j >= (n-3))) {
+                    score += 2;
+                }
+                
+                //all other cases
+                else {
+                    score++;
+                }
+            }
+        }
+    }
+    
+    return score;
+}
+
+
+
+
+
+//player plays
+int countScoreSecond(char board[][26], char color, int n, int row, int col) {
+    int score = 0;
     char pseudoBoard[26][26];
     
     for (int i = 0; i < n; i++) {
@@ -199,11 +292,11 @@ int countScore(char board[][26], char color, int n, int row, int col) {
                 //if the player's color lands on a tile touching the corners
                 //UGH TERRIBLE. -20 PENALTY
                 else if ((i <= 1 && j <= 1) || (i >= (n-2) && j <= 1) || (i <= 1 && j >= (n-2)) || (i >= (n-2) && j >= (n-2))) {
-                    score -= -20;
+                    score -= -10000;
                 }
                 
                 //if the player's color captures an edge
-                //GOOD. +3 REWARD
+                //GOOD. +20 REWARD
                 else if (i == 0 || j == 0 || i == (n-1) || j == (n-1)) {
                     score += 20;
                 }
@@ -279,12 +372,12 @@ bool checkLegalInDirection(char board[][26], int n, int row, int col, char turnC
     
     //checks if the space you’re on is unoccupied
     //if not true, should go to the next value of the loop
-    if (board[row][col] == 'U' && positionInBounds(n, row, col)) {
+    if (board[row][col] == U && positionInBounds(n, row, col)) {
         
         row += deltaRow;
         col += deltaCol;
         
-        if ((board[row][col] == turnColour)||(board[row][col] == 'U')||!positionInBounds(n, row, col)) {
+        if ((board[row][col] == turnColour)||(board[row][col] == U)||!positionInBounds(n, row, col)) {
             legal = false;
         }
         
@@ -299,7 +392,7 @@ bool checkLegalInDirection(char board[][26], int n, int row, int col, char turnC
                     legal = true;
                 }
                 
-                else {   //if the detector encounters 'U'
+                else {   //if the detector encounters U
                     //assigns legal to 0 here, BUT if the tile is oppositeColour, the loop will run again with the potential to be REASSIGNED to legal = 1 if it is the turnColour.
                     legal = false;
                 }
@@ -379,7 +472,7 @@ bool changeTileColour(char board[][26], int n, int row, int col, char turnColour
     row += deltaRow;
     col += deltaCol;
     
-    if ((board[row][col] == turnColour)||(board[row][col] == 'U')||!positionInBounds(n, row, col)) {
+    if ((board[row][col] == turnColour)||(board[row][col] == U)||!positionInBounds(n, row, col)) {
         legal = 0;
     }
     
@@ -408,7 +501,7 @@ bool changeTileColour(char board[][26], int n, int row, int col, char turnColour
                 
             }
             
-            else {   //if the detector encounters 'U'
+            else {   //if the detector encounters U
                 //assigns legal to 0 here, BUT if the tile is oppositeColour, the loop will run again with the potential to be REASSIGNED to legal = 1 if it is the turnColour.
                 legal = 0;
             }
@@ -449,7 +542,7 @@ char winner(char board[][26], int n, char playerColour, char computerColour) {
     }
     
     else {
-        winner = 'U';
+        winner = U;
     }
     
     return winner;
