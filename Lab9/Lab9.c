@@ -67,11 +67,12 @@ int main(void) {
             }
             
             inputStringFromUser(promptName, input, MAX_LENGTH);
-            *library[i].songName = *input;
+            strcpy(library[i].songName, input);
             inputStringFromUser(promptArtist, input, MAX_LENGTH);
-            *library[i].artist = *input;
+            strcpy(library[i].artist, input);
             inputStringFromUser(promptGenre, input, MAX_LENGTH);
-            *library[i].genre = *input;
+            strcpy(library[i].genre, input);
+            
             
         } else if (response == 'P') {
             // Print the music library.
