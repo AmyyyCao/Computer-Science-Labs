@@ -60,6 +60,7 @@ int main(void) {
             char *promptGenre = "Genre";
             
             int i = 0;
+            librarySize++;
             
             while (*library[i].songName != 0) {
                 i++;
@@ -160,7 +161,7 @@ void cocktailSort(Song library[], int size) {
                 // set shouldSwap to true if song i should go after song (i+1)
                 //
                 
-                if ( (library[i].songName) > (library[i+1].songName) ) {
+                if ( (library[i].artist[0]) > (library[i+1].artist[0]) ) {
                     shouldSwap = true;
                 }
                 else {
@@ -183,7 +184,7 @@ void cocktailSort(Song library[], int size) {
                 // set shouldSwap to true if song (i-1) should go after song i
                 //
                 
-                if ( (library[i-1].songName) > (library[i].songName) ) {
+                if ( (library[i-1].artist[0]) > (library[i].artist[0]) ) {
                     shouldSwap = true;
                 }
                 else {
