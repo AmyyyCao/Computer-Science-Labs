@@ -71,9 +71,9 @@ int main( void ) {
             char *promptArtist =  "Artist" ;
             char *promptGenre = "Genre" ;
             
-            char *name[20];
-            char *artist[20];
-            char *genre[20];
+            char *name[100];
+            char *artist[100];
+            char *genre[100];
             
             inputStringFromUser(promptName, input, MAX_LENGTH) ;
             strcpy(*name, input);
