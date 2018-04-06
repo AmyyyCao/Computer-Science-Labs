@@ -82,18 +82,22 @@ int main(void) {
             // Sort the songs using Cocktail Sort, in
             // alphabetical order by artist, breaking ties
             // using song names
-            
-            cocktailSort(library, librarySize);
-            
-            // then print the music library
-            
-            for (int i = 0; i < librarySize; i++) {
-                printf("\n%s\n%s\n%s\n",
-                       library[i].songName,
-                       library[i].artist,
-                       library[i].genre);
+            if (*library[1].songName == 0) {
+                printMusicLibraryEmpty();
             }
-            
+            else {
+                cocktailSort(library, librarySize);
+                
+                // then print the music library
+                
+                for (int i = 0; i < librarySize; i++) {
+                    printf("\n%s\n%s\n%s\n",
+                           library[i].songName,
+                           library[i].artist,
+                           library[i].genre);
+                }
+            }
+                
         } else if (response == 'Q') {
             // do nothing
             
