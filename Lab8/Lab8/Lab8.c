@@ -22,16 +22,13 @@ typedef struct song {
     struct song *next;
 } Song;
 
-//THIS IS THE HEAD OF THE LINKED LIST...
-Song *p;
-
 
 
 // Declarations of linked list functions
 
 void inputStringFromUser( char prompt[], char s[], int arraySize ) ;
 void songNameDuplicate( char songName[] ) ;
-bool compareSongName( Song *p, char *name[] );
+bool compareSongName( Song *p, char *name );
 void songNameFound( char songName[] ) ;
 void songNameNotFound( char songName[] ) ;
 void songNameDeleted( char songName[] ) ;
@@ -41,13 +38,17 @@ void printMusicLibraryEmpty( void ) ;
 void printMusicLibraryTitle( void ) ;
 void printMusicLibrary( Song *p );
 void songFound( Song *p, char *promptName );
-void insertSong( Song *p, char *name, char *artist, char *genre );
+Song *insertSong( Song *p, char *name, char *artist, char *genre );
 void deleteSong( Song *p, char *name );
 void deleteLibrary ( Song *p );
 
 const int MAX_LENGTH = 1024;
 
+
+
 int main( void ) {
+    //THIS IS THE HEAD OF THE LINKED LIST...
+    Song *p = NULL;
     
     // Announce the start of the program
     printf( "Personal Music Library.\n\n" ) ;
@@ -63,6 +64,13 @@ int main( void ) {
         // Convert to uppercase to simplify later comparisons.
         response = toupper( input[0] ) ;
         
+        
+        
+        
+        
+        
+        
+        
         if( response == 'I' ) {
             // Insert a song into the linked list.
             // Maintain the list in alphabetical order by song name.
@@ -71,24 +79,35 @@ int main( void ) {
             char *promptArtist =  "Artist" ;
             char *promptGenre = "Genre" ;
             
-            char *name[100];
-            char *artist[100];
-            char *genre[100];
+            char name[100];
+            char artist[100];
+            char genre[100];
             
             inputStringFromUser(promptName, input, MAX_LENGTH) ;
-            strcpy(*name, input);
+            strcpy(name, input);
             inputStringFromUser(promptArtist, input, MAX_LENGTH) ;
-            strcpy(*artist, input);
+            strcpy(artist, input);
             inputStringFromUser(promptGenre, input, MAX_LENGTH) ;
-            strcpy(*genre, input);
-        
-            if (!compareSongName(p, name)) {
-                insertSong(p, *name, *artist, *genre);
-            }
-            else {
+            strcpy(genre, input);
+            
+            
+            if (compareSongName(p, name)) {
                 songNameDuplicate(input);
             }
+
+            else {
+                p = insertSong(p, name, artist, genre);
+            }
         }
+        
+        
+        
+        
+        
+        
+        
+        
+        
         
         
         else if( response == 'D' ) {
@@ -103,19 +122,12 @@ int main( void ) {
         
         else if( response == 'S' ) {
             // Search for a song by its name.
-            char *name[20];
             
             char *prompt = "\nEnter the name of the song to search for" ;
             inputStringFromUser(prompt, input, MAX_LENGTH);
-            strcpy(*name, input);
-            
-            if (compareSongName(p, name)) {
-                songNameFound(input);
-                
-                //PRINT INFORMATION IN NODE
-                printf("%s", p->songName);
-                printf("%s", p->artist);
-                printf("%s", p->genre);
+
+            if (compareSongName(p, input)) {
+                ;
             }
             
             else {
@@ -127,12 +139,12 @@ int main( void ) {
         else if( response == 'P' ) {
             // Print the music library.
             
-            if (p->next != NULL) {
-                printMusicLibraryTitle();
-                printMusicLibrary(p); //can you declare this elsewhere?
-            }
-            else
+            if ( p == NULL ) {
                 printMusicLibraryEmpty();
+            } else {
+                printMusicLibraryTitle();
+                printMusicLibrary(p);
+            }
 
         }
         
@@ -211,9 +223,20 @@ void songNameNotFound( char songName[] ) {
 }
 
 
+//OK
 void deleteSong(Song *p, char *name) {
+    Song *temp = p, *prev = p;
     
+    while ( (temp != NULL) && (*temp->songName != *name) ) {
+        prev = temp;
+        temp = temp->next;
+    }
     
+    if (temp == NULL) return;
+    
+    prev->next = temp->next;
+    
+    free(temp);
 }
 
 // Function to call when a song name that is to be deleted
@@ -235,14 +258,16 @@ void printMusicLibraryTitle(void) {
 
 //Print songs in music library
 void printMusicLibrary(Song *p) {
-    if (p->next == NULL) {
-        return;
-    }
     //strcpy
-    printf("%s\n", p->songName);
-    printf("%s\n", p->artist);
-    printf("%s\n", p->genre);
-    printMusicLibrary( p->next );
+    printf("\n%s\n%s\n%s\n",
+           p->songName,
+           p->artist,
+           p->genre);
+
+    if (p->next == NULL)
+        return;
+    else
+        printMusicLibrary( p->next );
 }
 
 
@@ -256,51 +281,90 @@ void printMusicLibrary(Song *p) {
 // Add your functions below this line.
 
 //YEAH?
-bool compareSongName( Song *p, char *name[] ) {
+bool compareSongName( Song *p, char *name ) {
+    // will return true if the song name is the same
+    // otherwise, will search the next node
     
-    if (strcmp(p->songName, *name)) {
+    if (p == NULL) {
+        return false;
+    }
+    
+    else if (strcmp(p->songName, name) == 0) {
         return true;
     }
     
     else if (p->next != NULL) {
         if(compareSongName( p->next, name )) {
+            songNameFound(name);
+            //PRINT INFORMATION IN NODE
+            printf("\n%s\n%s\n%s\n",
+                   p->next->songName,
+                   p->next->artist,
+                   p->next->genre);
+            
             return true;
         }
         return false;
     }
     
-    else {
+    else
         return false;
-    }
 }
+
+
+
 
 //ALMOST OK
-void insertSong ( Song *p, char *name, char *artist, char *genre ) {
+//When you're at the node right before the one you want to add it to...
+Song *insertSong ( Song *p, char *name, char *artist, char *genre ) {
     
-    Song *newSong;
+    Song *temp = p, *prev = p;
     
-    newSong->songName = name;
-    newSong->artist = artist;
-    newSong->genre = genre;
+    Song *newSong = (Song *)malloc(sizeof(Song));
     
-    Song *newSong = (Song *)malloc(sizeof(newSong)); //HOW TO MALLOC?
+    newSong->songName = (char *)malloc(sizeof(char)*strlen(name));
+    newSong->artist = (char *)malloc(sizeof(char)*strlen(artist));
+    newSong->genre = (char *)malloc(sizeof(char)*strlen(genre));
     
-    newSong->next = p->next;
-    p->next = newSong;
     
+    //TO SORT: FIGURE OUT THE < SIGN IN THE FOLLOWING:
+    while ( (temp != NULL) && (strcmp(temp->songName, name) == -1) ) {
+        prev = temp;
+        temp = temp->next;
+    }
+    
+    strcpy(newSong->songName, name);
+    strcpy(newSong->artist, artist);
+    strcpy(newSong->genre, genre);
+    
+    if (temp == NULL) {
+        
+        p = newSong; //EXC_BAD_ACCESS when trying to insert song
+        newSong->next = NULL;
+        
+    } else {
+        
+        newSong->next = prev->next;
+        prev->next = newSong;
+        
+    }
+    return p;
 }
 
 
+
+//Yeah
 void deleteLibrary ( Song *p ) {
     if (p==NULL) {
         printf("\nThe music library is empty");
     }
     
     else {
+        Song *freeItem = p->next;
         printf("\nDeleting a song with name '%s' from the music library.\n", p->songName);
-        Song *f = p->next;
-        free(p);
-        deleteLibrary(f);
+        p = p->next;
+        free(freeItem);
+        deleteLibrary(p);
     }
 }
 
