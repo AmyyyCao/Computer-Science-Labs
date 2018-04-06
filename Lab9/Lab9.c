@@ -90,6 +90,8 @@ int main(void) {
                 
                 // then print the music library
                 
+                printMusicLibraryTitle();
+                
                 for (int i = 0; i < librarySize; i++) {
                     printf("\n%s\n%s\n%s\n",
                            library[i].songName,
@@ -169,6 +171,17 @@ void cocktailSort(Song library[], int size) {
                 if ( (library[i].artist[0]) > (library[i+1].artist[0]) ) {
                     shouldSwap = true;
                 }
+                
+                else if ( (library[i].artist[0]) == (library[i+1].artist[0]) ) {
+                    if ( (library[i].artist[1]) > (library[i+1].artist[1]) ) {
+                        shouldSwap = true;
+                    }
+                    
+                    else {
+                        shouldSwap = false;
+                    }
+                }
+                
                 else {
                     shouldSwap = false;
                 }
@@ -192,6 +205,17 @@ void cocktailSort(Song library[], int size) {
                 if ( (library[i-1].artist[0]) > (library[i].artist[0]) ) {
                     shouldSwap = true;
                 }
+                
+                else if ( (library[i-1].artist[0]) == (library[i].artist[0]) ) {
+                    if ( (library[i-1].artist[1]) > (library[i].artist[1]) ) {
+                        shouldSwap = true;
+                    }
+                    
+                    else {
+                        shouldSwap = false;
+                    }
+                }
+                
                 else {
                     shouldSwap = false;
                 }
