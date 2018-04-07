@@ -235,8 +235,12 @@ void deleteSong(Song *p, char *name) {
     if (temp == NULL) return;
     
     prev->next = temp->next;
-    
+
+    free(temp->artist);
+    free(temp->songName);
+    free(temp->genre);
     free(temp);
+
 }
 
 // Function to call when a song name that is to be deleted
@@ -319,7 +323,6 @@ bool compareSongName( Song *p, char *name ) {
 Song *insertSong ( Song *p, char *name, char *artist, char *genre ) {
     
     Song *temp = p, *prev = p;
-    
     Song *newSong = (Song *)malloc(sizeof(Song));
     
     newSong->songName = (char *)malloc(sizeof(char)*strlen(name));
@@ -327,7 +330,7 @@ Song *insertSong ( Song *p, char *name, char *artist, char *genre ) {
     newSong->genre = (char *)malloc(sizeof(char)*strlen(genre));
     
     
-    //TO SORT: FIGURE OUT THE < SIGN IN THE FOLLOWING:
+    //goes through until at the right node
     while ( (temp != NULL) && (strcmp(temp->songName, name) == -1) ) {
         prev = temp;
         temp = temp->next;
@@ -339,7 +342,7 @@ Song *insertSong ( Song *p, char *name, char *artist, char *genre ) {
     
     if (temp == NULL) {
         
-        p = newSong; //EXC_BAD_ACCESS when trying to insert song
+        p = newSong;
         newSong->next = NULL;
         
     } else {
@@ -356,14 +359,19 @@ Song *insertSong ( Song *p, char *name, char *artist, char *genre ) {
 //Yeah
 void deleteLibrary ( Song *p ) {
     if (p==NULL) {
-        printf("\nThe music library is empty");
+        printf("\nThe music library is empty.");
     }
     
     else {
         Song *freeItem = p->next;
         printf("\nDeleting a song with name '%s' from the music library.\n", p->songName);
         p = p->next;
+
+        free(freeItem->songName);
+        free(freeItem->artist);
+        free(freeItem->genre);
         free(freeItem);
+        
         deleteLibrary(p);
     }
 }
