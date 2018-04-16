@@ -1,6 +1,10 @@
 
 Debug
 
+Makefile
+
+CTest
+
 *.mk
 
 *.project
@@ -8,3 +12,13 @@ Debug
 *.txt
 
 *.xcodeproj
+
+*.pdf
+
+*.DS_Store
+
+*.h
+
+*.a
+
+*.workspace
