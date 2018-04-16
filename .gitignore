@@ -1,0 +1,10 @@
+
+Debug
+
+*.mk
+
+*.project
+
+*.txt
+
+*.xcodeproj
